@@ -5,7 +5,7 @@ import type { RouteRecordRaw } from "vue-router";
 import HomePage from "../views/Homepage/Main.vue";
 
 //Profile
-import Profile from "@/views/Profile/Main.vue";
+import Profile from "../views/profile/Main.vue";
 
 //Createaccount
 import Createaccount from "../views/Createaccount/Main.vue";
