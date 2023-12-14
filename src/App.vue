@@ -35,8 +35,8 @@ onMounted(() => {
   height: 100%;
   z-index: 99999;
   padding-top: 20%;
-  background: black;
-  color: orange;
+  background: #f0f0f0 !important;
+  color: rgb(0, 16, 99);
   span {
     width: 40px;
     height: 40px;
