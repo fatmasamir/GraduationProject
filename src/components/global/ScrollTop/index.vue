@@ -31,7 +31,7 @@ onMounted(() => {
 </script>
 <template>
   <div class="onScroll" v-if="showScroll">
-    <button
+    <!-- <button
       fab
       fixed
       bottom
@@ -43,7 +43,7 @@ onMounted(() => {
       data-aos-duration="100"
     >
       <span><img src="../../../assets/images/Top.png" /></span>
-    </button>
+    </button> -->
   </div>
 </template>
 <style scoped lang="scss">
