@@ -26,18 +26,19 @@ const handleOnComplete = (value: string) => {
 };
 
 // handel submit
-const handelSubmit = async () => {
+const handelSubmit = () => {
+  console.log(bindModal.value);
   authStore.resetPassword.otp = bindModal.value;
-  console.log("authStore.resetPassword.login", authStore.resetPassword);
   router.push("/reset-password");
 };
 onMounted(() => {
   AOS.init();
-  // if (!authStore.resetPassword.login) {
-  //   setTimeout(() => {
-  //     router.push("/forget-password");
-  //   }, 2000);
-  // }
+  console.log("!authStore.resetPassword.login", authStore.resetPassword);
+  if (!authStore.resetPassword.login) {
+    setTimeout(() => {
+      router.push("/forget-password");
+    }, 2000);
+  }
 });
 </script>
 <template>
@@ -67,12 +68,14 @@ onMounted(() => {
         </div>
         <div class="col-12 mt-3">
           <SimpleButton type="send" class="register_lab">
-            <button type="submit">
-              {{ t("Send") }}
+            <button
+              type="submit"
+              @click="handelSubmit"
+              v-if="!authStore.is_loading"
+            >
+              {{ t("send") }}
             </button>
-            <!-- <button type="submit" disabled v-else>
-                {{ t("wait") }}
-              </button> -->
+            <button type="submit" disabled v-else>{{ t("wait") }} ...</button>
           </SimpleButton>
         </div>
       </div>
@@ -84,5 +87,14 @@ onMounted(() => {
 .simple-button.send button {
   width: 100%;
   background: rgba(0, 16, 99, 1) !important;
+}
+.card {
+  margin: auto;
+  width: 40%;
+}
+@media screen and (max-width: 991px) {
+  .card {
+    width: 95%;
+  }
 }
 </style>

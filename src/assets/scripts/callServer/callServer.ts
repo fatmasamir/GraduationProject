@@ -21,7 +21,7 @@ let callServer: CallFunction = async (options) => {
   };
 
   // base url
-  const base_url: string = `http://instapbackend.danatportal.com/public`;
+  const base_url: string = `https://graduation.rpm-system.com`;
 
   const end_point: string = `${base_url}/${options.url}`;
   // header

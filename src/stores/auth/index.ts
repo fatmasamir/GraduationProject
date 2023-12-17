@@ -3,7 +3,6 @@ import type {
   Register,
   ResetPassword,
   VerifyRegister,
-  RegisterInterface,
   LoginSocialMedia,
   RegisterSocialMedia,
 } from "./interface";
@@ -38,15 +37,10 @@ export const useAuthStore = defineStore("auth", () => {
   });
 
   // registertion
-  const registertion = ref<RegisterInterface>({
-    first_name: "",
-    last_name: "",
+  const registertion = ref<Register>({
+    name: "",
     email: "",
-    phone: "",
     password: "",
-    password_confirmation: "",
-    is_lender: 0,
-    terms_and_conditions: 0,
   });
 
   // loginSocialMedia
@@ -93,11 +87,13 @@ export const useAuthStore = defineStore("auth", () => {
       is_error.value = true;
       is_loading.value = false;
       is_waiting.value = false;
+      localStorage.removeItem("user");
       throw errors;
     } else {
       toast.success("Successfully Register ... ");
       is_auth.value = true;
       is_loading.value = false;
+      localStorage.setItem("user", JSON.stringify(registertion.value));
     }
   }
 
@@ -144,9 +140,9 @@ export const useAuthStore = defineStore("auth", () => {
     if (response.ok) {
       is_auth.value = true;
       response.json().then(async (data: { token: string }) => {
+        console.log(response);
         localStorage.setItem("access_token", data.data.token);
-        localStorage.setItem("user", data.data.user);
-        user.value = data.data.user;
+        localStorage.setItem("user", JSON.stringify(data.data.user));
         localStorage.setItem("type", "account");
         toast.success("Successfully Login ... ");
       });
@@ -156,71 +152,12 @@ export const useAuthStore = defineStore("auth", () => {
       is_error.value = true;
       is_loading.value = false;
       is_waiting.value = false;
+      localStorage.removeItem("user");
       toast.error("data is Not Correct. .... ");
       throw response.status;
     }
   }
 
-  // login/register by google
-  async function registerGoogle(data) {
-    is_loading.value = true;
-    is_waiting.value = true;
-    const response = await callServer({
-      url: "api/auth/social/google",
-      method: "POST",
-      data,
-    });
-
-    if (response.ok) {
-      is_auth.value = true;
-      response.json().then(async (data: { token: string }) => {
-        localStorage.setItem("access_token", data.data.token);
-        localStorage.setItem("user", data.data.user);
-        user.value = data.data.user;
-        localStorage.setItem("type", "Google");
-        is_auth.value = true;
-        is_loading.value = false;
-        await window.location.reload();
-        toast.success("Successfully Login ... ");
-      });
-    } else {
-      is_error.value = true;
-      is_loading.value = false;
-      is_waiting.value = false;
-      toast.error("data is Not Correct. .... ");
-    }
-  }
-
-  // register by Facebook
-  async function registerFacebook(data) {
-    is_loading.value = true;
-    is_waiting.value = true;
-    console.log("data =", data);
-    const response = await callServer({
-      url: "api/auth/social/facebook",
-      method: "POST",
-      data,
-    });
-
-    if (response.ok) {
-      is_auth.value = true;
-      response.json().then(async (res) => {
-        localStorage.setItem("access_token", res.data.token);
-        localStorage.setItem("user", res.data.user);
-        user.value = res.data.user;
-        localStorage.setItem("type", "Facebook");
-        is_auth.value = true;
-        is_loading.value = false;
-        await window.location.reload();
-        toast.success("Successfully Login ... ");
-      });
-    } else {
-      is_error.value = true;
-      is_loading.value = false;
-      is_waiting.value = false;
-      toast.error("data is Not Correct. .... ");
-    }
-  }
   // forgetPassword
   async function forgetPassword(data) {
     is_loading.value = true;
@@ -234,7 +171,7 @@ export const useAuthStore = defineStore("auth", () => {
     if (response.ok) {
       is_auth.value = true;
       response.json().then(async (data: { access_token: string }) => {
-        toast.success("تم تسجيل الدخول بنجاح");
+        toast.success("Check Your Email ");
       });
       is_auth.value = true;
       is_loading.value = false;
@@ -260,7 +197,7 @@ export const useAuthStore = defineStore("auth", () => {
     if (response.ok) {
       is_auth.value = true;
       response.json().then(async (data: { access_token: string }) => {
-        toast.success("تم تسجيل الدخول بنجاح");
+        toast.success("Successfully Login ... ");
       });
       is_auth.value = true;
       is_loading.value = false;
@@ -274,29 +211,40 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   // logOut
-  function logOut() {
-    user.value = undefined;
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("token");
-    localStorage.removeItem("type");
-    localStorage.removeItem("user");
-    localStorage.removeItem("vue-facebook-login-accounts");
-    user.value = "";
-    toast.success("Successfully Logout ... ");
+  async function logOut(data) {
+    is_loading.value = true;
+    is_waiting.value = true;
     this.router.push("/login");
+    const response = await callServer({
+      url: "api/auth/logout",
+      method: "POST",
+      auth: true,
+      data,
+    });
+    if (response.ok) {
+      is_error.value = true;
+      is_loading.value = false;
+      is_waiting.value = false;
+      user.value = undefined;
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      user.value = "";
+      toast.success("Successfully Logout ... ");
+      this.router.push("/login");
+    } else {
+      is_error.value = true;
+      is_loading.value = false;
+      is_waiting.value = false;
+      toast.error("data is Not Correct. .... ");
+      throw response.status;
+    }
   }
 
-  // registertionResetFun
-  async function registertionResetFun() {
-    registertion.value.first_name = "";
-    registertion.value.last_name = "";
-    registertion.value.email = "";
-    registertion.value.phone = "";
-    registertion.value.password = "";
-    registertion.value.password_confirmation = "";
-    registertion.value.terms_and_conditions = 0;
-    console.log("registertion.value.phone", registertion.value);
-  }
+  // // registertionResetFun
+  // async function registertionResetFun() {
+  //   console.log("registertion.value.phone", registertion.value);
+  // }
   return {
     // properites
     is_loading,
@@ -315,9 +263,6 @@ export const useAuthStore = defineStore("auth", () => {
     logOut,
     forgetPassword,
     PasswordReset,
-    registerGoogle,
-    registertionResetFun,
-    registerFacebook,
     Verify,
   };
 });

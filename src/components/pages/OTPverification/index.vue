@@ -27,17 +27,27 @@ const handleOnComplete = (value: string) => {
 
 // handel submit
 const handelSubmit = async () => {
-  authStore.resetPassword.otp = bindModal.value;
-  console.log("authStore.resetPassword.login", authStore.resetPassword);
-  router.push("/reset-password");
+  try {
+    authStore.verifyRegister.otp = bindModal.value;
+    authStore.verifyRegister.login = JSON.parse(
+      localStorage.getItem("user")
+    ).email; //authStore.registertion.phone
+    await authStore
+      .Verify(JSON.stringify(authStore.verifyRegister))
+      .then(() => {
+        if (authStore.is_auth) {
+          setTimeout(() => {
+            router.push("/login");
+          }, 1000);
+          authStore.is_waiting = false;
+        }
+      });
+  } catch (err) {
+    console.log("Error Verify");
+  }
 };
 onMounted(() => {
   AOS.init();
-  // if (!authStore.resetPassword.login) {
-  //   setTimeout(() => {
-  //     router.push("/forget-password");
-  //   }, 2000);
-  // }
 });
 </script>
 <template>
@@ -50,31 +60,33 @@ onMounted(() => {
     <div class="card-body">
       <h6>OTP verification</h6>
       <div class="row mt-4 p-0 m-0">
-        <div class="style_otp">
-          <v-otp-input
-            ref="otpInput"
-            class="otpInput"
-            v-model:value="bindModal"
-            input-classes="otp-input"
-            separator=" "
-            :num-inputs="6"
-            :should-auto-focus="true"
-            input-type="letter-numeric"
-            :conditionalClass="['one', 'two', 'three', 'four', 'five', 'six']"
-            :placeholder="['-', '-', '-', '-', '-', '-']"
-            @on-complete="handleOnComplete"
-          />
-        </div>
-        <div class="col-12 mt-3 p-0 m-0">
-          <SimpleButton type="send" class="register_lab">
-            <button type="submit">
-              {{ t("Send") }}
-            </button>
-            <!-- <button type="submit" disabled v-else>
+        <form @submit.prevent="handelSubmit">
+          <div class="style_otp">
+            <v-otp-input
+              ref="otpInput"
+              class="otpInput"
+              v-model:value="bindModal"
+              input-classes="otp-input"
+              separator=" "
+              :num-inputs="6"
+              :should-auto-focus="true"
+              input-type="letter-numeric"
+              :conditionalClass="['one', 'two', 'three', 'four', 'five', 'six']"
+              :placeholder="['-', '-', '-', '-', '-', '-']"
+              @on-complete="handleOnComplete"
+            />
+          </div>
+          <div class="col-12 mt-3 p-0 m-0">
+            <SimpleButton type="send" class="register_lab">
+              <button type="submit" v-if="!authStore.is_loading">
+                {{ t("Send") }}
+              </button>
+              <button type="submit" disabled v-else>
                 {{ t("wait") }}
-              </button> -->
-          </SimpleButton>
-        </div>
+              </button>
+            </SimpleButton>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -84,5 +96,14 @@ onMounted(() => {
 .simple-button.send button {
   width: 100%;
   background: rgba(0, 16, 99, 1) !important;
+}
+.card {
+  margin: auto;
+  width: 40%;
+}
+@media screen and (max-width: 991px) {
+  .card {
+    width: 95%;
+  }
 }
 </style>

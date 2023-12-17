@@ -6,6 +6,14 @@ import SimpleButton from "@/components/global/Buttons/simpleButton/SimpleButton.
 import { useForm } from "vee-validate";
 import * as Yup from "yup";
 import AOS from "aos";
+import { useAuthStore } from "@/stores/auth";
+import { useRouter } from "vue-router";
+
+//router
+let router = useRouter();
+
+// auth store
+const authStore = useAuthStore();
 
 // i18n
 const { t } = useI18n();
@@ -19,15 +27,16 @@ const { meta } = useForm();
 // formLogin
 const { errors, handleSubmit, defineInputBinds } = useForm({
   validationSchema: Yup.object({
-    email: Yup.string().email().required(),
-    Password: Yup.string().min(6).required(),
+    login: Yup.string().required("required email"),
+    password: Yup.string().min(6).required(),
   }),
 });
 
 //message ,phone
-const email = defineInputBinds("email");
-const Password = defineInputBinds("Password");
+const login = defineInputBinds("login");
+const password = defineInputBinds("password");
 const error = ref(false);
+
 // input password type
 const passwordFieldType = ref<string>("password");
 
@@ -36,13 +45,22 @@ const switchVisibility = () => {
   passwordFieldType.value =
     passwordFieldType.value === "password" ? "text" : "password";
 };
+
 // handel submit
 let onSubmit = handleSubmit((values: any) => {
-  error.value = false;
   if (values) {
-    console.log("values =", values);
-  } else {
-    error.value = true;
+    try {
+      authStore.login(JSON.stringify(values)).then(() => {
+        if (authStore.is_auth) {
+          setTimeout(() => {
+            router.push("/");
+          }, 1000);
+          authStore.is_waiting = false;
+        }
+      });
+    } catch (err) {
+      console.log(err);
+    }
   }
 });
 
@@ -68,12 +86,12 @@ onMounted(() => {
                 type="email"
                 id="email"
                 name="email"
-                v-bind="email"
+                v-bind="login"
                 placeholder="email"
-                :class="{ 'is-invalid': errors.email }"
+                :class="{ 'is-invalid': errors.login }"
               />
 
-              <div class="invalid-feedback">{{ errors.email }}</div>
+              <div class="invalid-feedback">{{ errors.login }}</div>
             </SimpleInput>
           </div>
           <div class="col-md-12 passwordField">
@@ -83,9 +101,9 @@ onMounted(() => {
                 :type="passwordFieldType"
                 id="Password"
                 name="Password"
-                v-bind="Password"
+                v-bind="password"
                 placeholder="Password"
-                :class="{ 'is-invalid': errors.Password }"
+                :class="{ 'is-invalid': errors.password }"
               />
               <img
                 src="@/assets/images/eye-svgrepo.svg"
@@ -99,17 +117,25 @@ onMounted(() => {
                 v-else
               />
 
-              <div class="invalid-feedback">{{ errors.Password }}</div>
+              <div class="invalid-feedback">{{ errors.password }}</div>
             </SimpleInput>
+          </div>
+          <div class="col-md-12 mt-1 forget_password">
+            <div class="">
+              <router-link to="/create-account">{{ t("Signup") }}</router-link>
+            </div>
+            <router-link to="/forget-password">{{
+              t("forgetPass")
+            }}</router-link>
           </div>
           <div class="col-12 mt-3">
             <SimpleButton type="send" class="register_lab">
-              <button type="submit">
+              <button type="submit" v-if="!authStore.is_loading">
                 {{ t("Log in") }}
               </button>
-              <!-- <button type="submit" disabled v-else>
+              <button type="submit" disabled v-else>
                 {{ t("wait") }}
-              </button> -->
+              </button>
             </SimpleButton>
           </div>
         </div>
@@ -121,7 +147,11 @@ onMounted(() => {
 @import "../Hompage/FormStyling.scss";
 .simple-button.send button {
   width: 100%;
-} /* passwordField */
+}
+.card {
+  margin: auto;
+}
+/* passwordField */
 .passwordField {
   position: relative;
   z-index: 1;
@@ -133,6 +163,13 @@ onMounted(() => {
     cursor: pointer;
     width: 24px;
     height: 24px;
+  }
+}
+.forget_password {
+  justify-content: space-between;
+  display: flex;
+  a {
+    color: rgba(0, 16, 99, 1) !important;
   }
 }
 </style>

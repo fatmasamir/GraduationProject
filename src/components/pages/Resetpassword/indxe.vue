@@ -4,8 +4,13 @@ import { useI18n } from "vue-i18n";
 import SimpleInput from "@/components/global/CusomInputs/SimpleInput/SimpleInput.vue";
 import SimpleButton from "@/components/global/Buttons/simpleButton/SimpleButton.vue";
 import { useForm } from "vee-validate";
+import { useAuthStore } from "@/stores/auth";
 import * as Yup from "yup";
 import AOS from "aos";
+import { useRouter } from "vue-router";
+
+// router
+const router = useRouter();
 
 // i18n
 const { t } = useI18n();
@@ -41,6 +46,8 @@ const switchVisibility = () => {
     passwordFieldType.value === "password" ? "text" : "password";
 };
 
+// auth store
+const authStore = useAuthStore();
 // show/hide new password
 const switchVisibilityComfirm = () => {
   passwordFieldTypeComfirm.value =
@@ -50,9 +57,21 @@ const switchVisibilityComfirm = () => {
 let onSubmit = handleSubmit((values: any) => {
   error.value = false;
   if (values) {
-    console.log("values =", values);
-  } else {
-    error.value = true;
+    console.log("values", JSON.stringify(values));
+    authStore.resetPassword.password = values.password;
+    authStore.resetPassword.password_confirmation =
+      values.password_confirmation;
+    console.log("authStore.resetPassword.login", authStore.resetPassword);
+    authStore
+      .PasswordReset(JSON.stringify(authStore.resetPassword))
+      .then(() => {
+        if (authStore.is_auth) {
+          setTimeout(() => {
+            router.push("/login");
+          }, 1000);
+          authStore.is_waiting = false;
+        }
+      });
   }
 });
 
@@ -157,5 +176,8 @@ onMounted(() => {
     width: 24px;
     height: 24px;
   }
+}
+.card {
+  margin: auto;
 }
 </style>

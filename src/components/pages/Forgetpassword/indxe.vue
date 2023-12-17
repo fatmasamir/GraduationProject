@@ -6,6 +6,14 @@ import SimpleButton from "@/components/global/Buttons/simpleButton/SimpleButton.
 import { useForm } from "vee-validate";
 import * as Yup from "yup";
 import AOS from "aos";
+import { useAuthStore } from "@/stores/auth";
+import { useRouter } from "vue-router";
+
+//router
+let router = useRouter();
+
+// auth store
+const authStore = useAuthStore();
 
 // i18n
 const { t } = useI18n();
@@ -19,21 +27,31 @@ const { meta } = useForm();
 // formLogin
 const { errors, handleSubmit, defineInputBinds } = useForm({
   validationSchema: Yup.object({
-    email: Yup.string().email().required(),
+    login: Yup.string().email().required("reqired email filed"),
   }),
 });
 
 //message ,phone
-const email = defineInputBinds("email");
+const login = defineInputBinds("login");
 const error = ref(false);
 
 // handel submit
 let onSubmit = handleSubmit((values: any) => {
-  error.value = false;
   if (values) {
-    console.log("values =", values);
-  } else {
-    error.value = true;
+    const data = { login: values.login };
+    try {
+      authStore.resetPassword.login = values.login;
+      authStore.forgetPassword(JSON.stringify(values)).then(() => {
+        if (authStore.is_auth) {
+          setTimeout(() => {
+            router.push("/forget-password-otp");
+          }, 1000);
+          authStore.is_waiting = false;
+        }
+      });
+    } catch (err) {
+      console.log(err);
+    }
   }
 });
 
@@ -59,22 +77,22 @@ onMounted(() => {
                 type="email"
                 id="email"
                 name="email"
-                v-bind="email"
+                v-bind="login"
                 placeholder="email"
-                :class="{ 'is-invalid': errors.email }"
+                :class="{ 'is-invalid': errors.login }"
               />
 
-              <div class="invalid-feedback">{{ errors.email }}</div>
+              <div class="invalid-feedback">{{ errors.login }}</div>
             </SimpleInput>
           </div>
           <div class="col-12 mt-3">
             <SimpleButton type="send" class="register_lab">
-              <button type="submit">
+              <button type="submit" v-if="!authStore.is_loading">
                 {{ t("Send") }}
               </button>
-              <!-- <button type="submit" disabled v-else>
+              <button type="submit" disabled v-else>
                 {{ t("wait") }}
-              </button> -->
+              </button>
             </SimpleButton>
           </div>
         </div>
@@ -86,5 +104,8 @@ onMounted(() => {
 @import "../Hompage/FormStyling.scss";
 .simple-button.send button {
   width: 100%;
+}
+.card {
+  margin: auto;
 }
 </style>

@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { useAuthStore } from "@/stores/auth";
+import { useRouter } from "vue-router";
 let activeItem = ref("Profile");
+
+//router
+let router = useRouter();
+//Language
+const authStore = useAuthStore();
 let Slidebar = ref([
   {
     id: 0,
@@ -44,6 +51,17 @@ let Slidebar = ref([
     Link: "/announcement",
   },
 ]);
+//Logout
+const Logout = () => {
+  if (localStorage.getItem("user")) {
+    const data = {
+      login: JSON.parse(localStorage.getItem("user")).email,
+      password: JSON.parse(localStorage.getItem("user")).password,
+    };
+    authStore.logOut(data);
+    router.push("/login");
+  }
+};
 </script>
 <template>
   <div class="Slidebar">
@@ -60,10 +78,10 @@ let Slidebar = ref([
       </li>
     </ul>
     <div class="logout">
-      <router-link to="/"
-        ><img src="@/assets/images/logout.svg" />
-        <p>Log out</p></router-link
-      >
+      <div class="LinkLogout" @click="Logout()">
+        <img src="@/assets/images/logout.svg" />
+        <p>Log out</p>
+      </div>
     </div>
   </div>
 </template>
@@ -131,7 +149,7 @@ let Slidebar = ref([
     bottom: 50px;
     margin: auto;
     width: 80%;
-    a {
+    .LinkLogout {
       display: flex;
       align-items: center;
       justify-content: center;

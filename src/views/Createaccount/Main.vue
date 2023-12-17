@@ -1,5 +1,17 @@
 <script setup>
 import Createaccount from "@/components/pages/Createaccount/index.vue";
+import { onMounted } from "vue";
+import { useRouter } from "vue-router";
+
+//router
+let router = useRouter();
+
+//onMounted
+onMounted(() => {
+  if (localStorage.getItem("access_token")) {
+    router.push("/login");
+  }
+});
 </script>
 <template>
   <div class="Createaccount">
@@ -9,8 +21,8 @@ import Createaccount from "@/components/pages/Createaccount/index.vue";
 <style scoped>
 .Createaccount {
   padding-top: 10%;
-  background: url(../images/Blackground.png) center center no-repeat;
+  background: url("../../assets/images/Blackground.png") center center no-repeat;
   background-size: cover;
-  position: relative;
+  height: 100vh;
 }
 </style>

@@ -1,5 +1,17 @@
 <script setup>
 import Login from "@/components/pages/Login/indxe.vue";
+import { onMounted } from "vue";
+import { useRouter } from "vue-router";
+
+//router
+let router = useRouter();
+
+//onMounted
+onMounted(() => {
+  if (localStorage.getItem("access_token")) {
+    router.push("/");
+  }
+});
 </script>
 <template>
   <div class="Login">

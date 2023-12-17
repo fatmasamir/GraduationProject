@@ -22,7 +22,11 @@
       height: 55px !important;
       background: #f9f9f9;
       border: 1px solid var(--second-gray-border-color);
-    }
+      -webkit-border-radius: 4px;
+      -moz-border-radius: 4px;
+      -ms-border-radius: 4px;
+      -o-border-radius: 4px;
+}
     div:first-child .otp-input {
       margin-left: 0px;
     }

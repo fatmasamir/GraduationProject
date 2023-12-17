@@ -1,6 +1,19 @@
 <script setup>
 import Hompage from "@/components/pages/Hompage/index.vue";
 import Slidebar from "@/components/global/Slidebar/index.vue";
+import { onMounted, ref } from "@vue/runtime-core";
+import { useRouter } from "vue-router";
+
+//router
+let router = useRouter();
+
+//onMounted
+onMounted(() => {
+  if (!localStorage.getItem("access_token")) {
+    console.log(localStorage.getItem("access_token"));
+    router.push("/login");
+  }
+});
 </script>
 <template>
   <div class="Pages">

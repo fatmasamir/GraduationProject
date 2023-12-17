@@ -4,11 +4,18 @@ import { useI18n } from "vue-i18n";
 import SimpleInput from "@/components/global/CusomInputs/SimpleInput/SimpleInput.vue";
 import SimpleButton from "@/components/global/Buttons/simpleButton/SimpleButton.vue";
 import { useForm } from "vee-validate";
+import { useAuthStore } from "@/stores/auth";
 import * as Yup from "yup";
+import { useRouter } from "vue-router";
 import AOS from "aos";
 
 // i18n
 const { t } = useI18n();
+// router
+const router = useRouter();
+
+// auth store
+const authStore = useAuthStore();
 
 // formRef
 const formRef = ref(null);
@@ -21,14 +28,14 @@ const { errors, handleSubmit, defineInputBinds } = useForm({
   validationSchema: Yup.object({
     name: Yup.string().required(),
     email: Yup.string().email().required(),
-    Password: Yup.string().min(6).required(),
+    password: Yup.string().min(8).required(),
   }),
 });
 
 //message ,name,phone
 const name = defineInputBinds("name");
 const email = defineInputBinds("email");
-const Password = defineInputBinds("Password");
+const password = defineInputBinds("password");
 const error = ref(false);
 // input password type
 const passwordFieldType = ref<string>("password");
@@ -39,12 +46,18 @@ const switchVisibility = () => {
     passwordFieldType.value === "password" ? "text" : "password";
 };
 // handel submit
-let onSubmit = handleSubmit((values: any) => {
-  error.value = false;
+let onSubmit = handleSubmit(async (values: any) => {
   if (values) {
-    console.log("values =", values);
-  } else {
-    error.value = true;
+    authStore.registertion.name = values.name;
+    authStore.registertion.email = values.email;
+    authStore.registertion.password = values.password;
+    await authStore
+      .register(JSON.stringify(authStore.registertion))
+      .then(() => {
+        setTimeout(() => {
+          router.push("/otp-verification");
+        }, 1000);
+      });
   }
 });
 
@@ -98,11 +111,11 @@ onMounted(() => {
               <!-- <label>Email <span class="text-red">*</span> </label> -->
               <input
                 :type="passwordFieldType"
-                id="Password"
-                name="Password"
-                v-bind="Password"
+                id="password"
+                name="password"
+                v-bind="password"
                 placeholder="Password"
-                :class="{ 'is-invalid': errors.Password }"
+                :class="{ 'is-invalid': errors.password }"
               />
               <img
                 src="@/assets/images/eye-svgrepo.svg"
@@ -116,17 +129,17 @@ onMounted(() => {
                 v-else
               />
 
-              <div class="invalid-feedback">{{ errors.Password }}</div>
+              <div class="invalid-feedback">{{ errors.password }}</div>
             </SimpleInput>
           </div>
           <div class="col-12 mt-3">
             <SimpleButton type="send" class="register_lab">
-              <button type="submit">
+              <button type="submit" v-if="!authStore.is_loading">
                 {{ t("Signup") }}
               </button>
-              <!-- <button type="submit" disabled v-else>
+              <button type="submit" disabled v-else>
                 {{ t("wait") }}
-              </button> -->
+              </button>
             </SimpleButton>
           </div>
         </div>
@@ -138,7 +151,11 @@ onMounted(() => {
 @import "../Hompage/FormStyling.scss";
 .simple-button.send button {
   width: 100%;
-} /* passwordField */
+}
+.card {
+  margin: auto;
+}
+/* passwordField */
 .passwordField {
   position: relative;
   z-index: 1;

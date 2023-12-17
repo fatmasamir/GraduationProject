@@ -1,5 +1,5 @@
 <script setup>
-import OTPverification from "@/components/pages/OTPverification/index.vue";
+import OTPverification from "@/components/pages/ForgetPasswordOtp/index.vue";
 </script>
 <template>
   <div class="OTPverification">

@@ -1,7 +1,8 @@
 const en = {
   Send: "Send",
   requiredFiled: "this Filed is required",
-  Signup: "Sign up",
+  Signup: "Create account",
+  forgetPass: "Forget password ?",
 };
 
 export default en;
