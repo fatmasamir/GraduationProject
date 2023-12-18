@@ -6,9 +6,13 @@ import SimpleButton from "@/components/global/Buttons/simpleButton/SimpleButton.
 import { useForm } from "vee-validate";
 import * as Yup from "yup";
 import AOS from "aos";
+import { Useissues } from "@/stores/issues/index";
 
 // i18n
 const { t } = useI18n();
+
+// i18n
+const useissues = Useissues();
 
 // formRef
 const formRef = ref(null);
@@ -19,16 +23,14 @@ const { meta } = useForm();
 // formLogin
 const { errors, handleSubmit, defineInputBinds } = useForm({
   validationSchema: Yup.object({
-    name: Yup.string().required(),
-    phone: Yup.string().required(),
-    message: Yup.string().min(6).required(),
+    title: Yup.string().required("Name is reqired"),
+    description: Yup.string().min(6).required("Message is Required"),
   }),
 });
 
 //message ,name,phone
-const name = defineInputBinds("name");
-const phone = defineInputBinds("phone");
-const message = defineInputBinds("message");
+const title = defineInputBinds("title");
+const description = defineInputBinds("description");
 const image = ref();
 const imageUrl = ref();
 const imageName = ref();
@@ -48,20 +50,19 @@ let imageLoaded = (event) => {
   imageName.value = image.value.name;
 };
 // handel submit
-let onSubmit = handleSubmit((values: any) => {
+let onSubmit = handleSubmit(async (values: any) => {
   error.value = false;
   if (image.value) {
     let formdata = new FormData();
     let data = {
-      name: values.name,
-      phone: values.phone,
-      message: values.message,
-      image: image.value,
+      title: values.title,
+      description: values.description,
     };
     for (let key in data) {
       formdata.append(key, data[key]);
     }
-    console.log("formdata =", formdata);
+    formdata.append("media[0]", image.value);
+    await useissues.make_issues(formdata);
   } else {
     error.value = true;
   }
@@ -82,34 +83,19 @@ onMounted(() => {
       <h6>Fill in your data so we can help you</h6>
       <form @submit.prevent="onSubmit">
         <div class="row mt-4">
-          <div class="col-md-6">
+          <div class="col-md-12">
             <SimpleInput>
               <!-- <label>Email <span class="text-red">*</span> </label> -->
               <input
                 type="text"
-                id="name"
-                name="name"
-                v-bind="name"
-                placeholder="Name"
-                :class="{ 'is-invalid': errors.name }"
+                id="title"
+                name="title"
+                v-bind="title"
+                placeholder="title"
+                :class="{ 'is-invalid': errors.title }"
               />
 
-              <div class="invalid-feedback">{{ errors.name }}</div>
-            </SimpleInput>
-          </div>
-          <div class="col-md-6">
-            <SimpleInput>
-              <!-- <label>Email <span class="text-red">*</span> </label> -->
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                v-bind="phone"
-                placeholder="phone"
-                :class="{ 'is-invalid': errors.phone }"
-              />
-
-              <div class="invalid-feedback">{{ errors.phone }}</div>
+              <div class="invalid-feedback">{{ errors.title }}</div>
             </SimpleInput>
           </div>
           <div class="col-10 upload_content">
@@ -135,22 +121,22 @@ onMounted(() => {
                 type="message"
                 id="message"
                 name="message"
-                v-bind="message"
+                v-bind="description"
                 placeholder="message"
-                :class="{ 'is-invalid': errors.message }"
+                :class="{ 'is-invalid': errors.description }"
               ></textarea>
 
-              <div class="invalid-feedback">{{ errors.message }}</div>
+              <div class="invalid-feedback">{{ errors.description }}</div>
             </SimpleInput>
           </div>
           <div class="col-12 mt-3">
             <SimpleButton type="send" class="register_lab">
-              <button type="submit">
+              <button type="submit" v-if="!useissues.is_loading">
                 {{ t("Send") }}
               </button>
-              <!-- <button type="submit" disabled v-else>
+              <button type="submit" disabled v-else>
                 {{ t("wait") }}
-              </button> -->
+              </button>
             </SimpleButton>
           </div>
         </div>

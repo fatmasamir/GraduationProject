@@ -3,7 +3,11 @@ import { onMounted, ref } from "@vue/runtime-core";
 import { useLang } from "@/stores/lang";
 import { useLight } from "@/stores/light";
 import ScrollTop from "./components/global/ScrollTop/index.vue";
+import { useRouter } from "vue-router";
+import LoadingSpinner from "./components/global/Loading/index.vue";
 
+//router
+let router = useRouter();
 //Language
 const Language = useLang();
 
@@ -14,7 +18,9 @@ const loading = ref(true);
 onMounted(() => {
   //onMounted
   Language.changeLayout();
-
+  if (!localStorage.getItem("access_token")) {
+    router.push("/login");
+  }
   //setTimeout
   setTimeout(function () {
     loading.value = false;
@@ -22,9 +28,7 @@ onMounted(() => {
 });
 </script>
 <template>
-  <div class="text-center loading" v-if="loading">
-    <b-spinner label="Spinning"></b-spinner>
-  </div>
+  <LoadingSpinner v-if="loading" />
   <div class="scrollTop"><a href="#"></a></div>
   <router-view></router-view><ScrollTop />
 </template>

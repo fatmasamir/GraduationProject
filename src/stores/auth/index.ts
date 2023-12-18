@@ -70,7 +70,6 @@ export const useAuthStore = defineStore("auth", () => {
 
   // register
   async function register(data: Register) {
-    console.log("data", data);
     is_loading.value = true;
     is_waiting.value = true;
     const response = await callServer({
@@ -80,7 +79,6 @@ export const useAuthStore = defineStore("auth", () => {
     });
     if (!response.ok) {
       let errors = null;
-      console.log("errors == response");
       await response.json().then((data) => {
         toast.error(data.message);
       });
@@ -139,20 +137,19 @@ export const useAuthStore = defineStore("auth", () => {
 
     if (response.ok) {
       is_auth.value = true;
-      response.json().then(async (data: { token: string }) => {
-        console.log(response);
+      await response.json().then(async (data: { token: string }) => {
         localStorage.setItem("access_token", data.data.token);
         localStorage.setItem("user", JSON.stringify(data.data.user));
-        localStorage.setItem("type", "account");
+        console.log("local ==", localStorage.getItem("access_token"));
         toast.success("Successfully Login ... ");
+        is_auth.value = true;
+        is_loading.value = false;
+        this.router.push("/");
       });
-      is_auth.value = true;
-      is_loading.value = false;
     } else {
       is_error.value = true;
       is_loading.value = false;
       is_waiting.value = false;
-      localStorage.removeItem("user");
       toast.error("data is Not Correct. .... ");
       throw response.status;
     }
@@ -197,7 +194,7 @@ export const useAuthStore = defineStore("auth", () => {
     if (response.ok) {
       is_auth.value = true;
       response.json().then(async (data: { access_token: string }) => {
-        toast.success("Successfully Login ... ");
+        toast.success("Successfully   ... ");
       });
       is_auth.value = true;
       is_loading.value = false;
@@ -211,10 +208,11 @@ export const useAuthStore = defineStore("auth", () => {
   }
 
   // logOut
-  async function logOut(data) {
-    is_loading.value = true;
-    is_waiting.value = true;
-    this.router.push("/login");
+  async function logOut() {
+    const data = {
+      login: JSON.parse(localStorage.getItem("user")).email,
+    };
+    console.log("data", data);
     const response = await callServer({
       url: "api/auth/logout",
       method: "POST",
@@ -222,20 +220,11 @@ export const useAuthStore = defineStore("auth", () => {
       data,
     });
     if (response.ok) {
-      is_error.value = true;
-      is_loading.value = false;
-      is_waiting.value = false;
-      user.value = undefined;
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      user.value = "";
-      toast.success("Successfully Logout ... ");
-      this.router.push("/login");
+      await localStorage.removeItem("access_token");
+      await localStorage.removeItem("user");
+      await toast.success("Successfully Logout ... ");
+      await this.router.push("/login");
     } else {
-      is_error.value = true;
-      is_loading.value = false;
-      is_waiting.value = false;
       toast.error("data is Not Correct. .... ");
       throw response.status;
     }

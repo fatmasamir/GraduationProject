@@ -6,69 +6,48 @@ import SimpleButton from "@/components/global/Buttons/simpleButton/SimpleButton.
 import { useForm } from "vee-validate";
 import * as Yup from "yup";
 import AOS from "aos";
+import { UseProfile } from "@/stores/Profile/index";
 
 // i18n
 const { t } = useI18n();
+
+// i18n
+const useProfile = UseProfile();
 
 // formRef
 const formRef = ref(null);
 
 // meta
 const { meta } = useForm();
-
+const user = ref();
 // formLogin
-const { errors, handleSubmit, defineInputBinds } = useForm({
+const { errors, handleSubmit, resetForm, defineInputBinds } = useForm({
   validationSchema: Yup.object({
-    name: Yup.string().required(),
-    phone: Yup.string().required(),
-    message: Yup.string().min(6).required(),
+    new_username: Yup.string().required("new username is required"),
   }),
 });
 
 //message ,name,phone
-const name = defineInputBinds("name");
-const phone = defineInputBinds("phone");
-const message = defineInputBinds("message");
-const image = ref();
-const imageUrl = ref();
-const imageName = ref();
-const error = ref(false);
-
-// fileSelected
-let fileSelected = (event) => {
-  const file = event.target.files.item(0);
-  image.value = file;
-  const reader = new FileReader();
-  error.value = false;
-  reader.addEventListener("load", imageLoaded);
-  reader.readAsDataURL(file);
-};
-let imageLoaded = (event) => {
-  imageUrl.value = event.target.result;
-  imageName.value = image.value.name;
-};
+const new_username = defineInputBinds("new_username");
 // handel submit
 let onSubmit = handleSubmit((values: any) => {
-  error.value = false;
-  if (image.value) {
-    let formdata = new FormData();
-    let data = {
-      name: values.name,
-      phone: values.phone,
-      message: values.message,
-      image: image.value,
-    };
-    for (let key in data) {
-      formdata.append(key, data[key]);
+  if (values) {
+    console.log(values);
+    try {
+      useProfile.get_new_username(JSON.stringify(values));
+    } catch (err) {
+      console.log(err);
     }
-    console.log("formdata =", formdata);
-  } else {
-    error.value = true;
   }
 });
 
 onMounted(() => {
   AOS.init();
+  if (localStorage.getItem("user")) {
+    resetForm({
+      values: { new_username: JSON.parse(localStorage.getItem("user")).name },
+    });
+  }
 });
 </script>
 <template>
@@ -89,22 +68,24 @@ onMounted(() => {
                 type="text"
                 id="name"
                 name="name"
-                v-bind="name"
+                v-bind="new_username"
                 placeholder="Name"
-                :class="{ 'is-invalid': errors.name }"
+                :class="{
+                  'is-invalid': errors.new_username,
+                }"
               />
 
-              <div class="invalid-feedback">{{ errors.name }}</div>
+              <div class="invalid-feedback">{{ errors.new_username }}</div>
             </SimpleInput>
           </div>
           <div class="col-12 mt-3">
             <SimpleButton type="send" class="register_lab">
-              <button type="submit">
+              <button type="submit" v-if="!useProfile.is_loading">
                 {{ t("Save") }}
               </button>
-              <!-- <button type="submit" disabled v-else>
-                {{ t("wait") }}
-              </button> -->
+              <button type="submit" disabled v-else>
+                {{ t("wait") }} .....
+              </button>
             </SimpleButton>
           </div>
         </div>

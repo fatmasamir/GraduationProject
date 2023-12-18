@@ -52,14 +52,9 @@ let Slidebar = ref([
   },
 ]);
 //Logout
-const Logout = () => {
+const Logout = async () => {
   if (localStorage.getItem("user")) {
-    const data = {
-      login: JSON.parse(localStorage.getItem("user")).email,
-      password: JSON.parse(localStorage.getItem("user")).password,
-    };
-    authStore.logOut(data);
-    router.push("/login");
+    await authStore.logOut();
   }
 };
 </script>
@@ -202,7 +197,7 @@ const Logout = () => {
       margin: 0px;
       padding: 15px 20px !important;
       display: flex;
-      a {
+      .LinkLogout {
         width: max-content;
       }
     }

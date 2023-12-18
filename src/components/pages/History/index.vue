@@ -5,8 +5,11 @@ import SimpleInput from "@/components/global/CusomInputs/SimpleInput/SimpleInput
 import SimpleButton from "@/components/global/Buttons/simpleButton/SimpleButton.vue";
 import { useForm } from "vee-validate";
 import * as Yup from "yup";
+import { defineProps } from "vue";
 import AOS from "aos";
-
+import Loading from "../../global/Loading/index.vue";
+// i18n
+const props = defineProps(["Histories"]);
 // i18n
 const { t } = useI18n();
 
@@ -20,38 +23,9 @@ let MakeFeedback = (index) => {
   NumberHistory.value[index] = !NumberHistory.value[index];
   console.log("NumberHistory", NumberHistory.value);
 };
-let data = ref([
-  {
-    id: 1,
-    title: "Title",
-    img: new URL(`@/assets/images/image1.png`, import.meta.url).href,
-    date: "10/10/2022",
-    style: "Accepted",
-    discription:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown",
-  },
-  {
-    id: 1,
-    title: "Title",
-    img: new URL(`@/assets/images/image1.png`, import.meta.url).href,
-    date: "10/10/2022",
-    style: "Rejected",
-    discription:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown",
-  },
-  {
-    id: 2,
-    title: "Title",
-    img: new URL(`@/assets/images/image1.png`, import.meta.url).href,
-    date: "10/10/2022",
-    style: "Pending",
-    discription:
-      "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown",
-  },
-]);
 onMounted(() => {
   AOS.init();
-  for (let key in data) {
+  for (let key in props.Histories) {
     NumberHistory.value.push(false);
   }
   console.log("NumberHistory", NumberHistory.value);
@@ -65,26 +39,30 @@ onMounted(() => {
     data-aos-duration="900"
   >
     <h6 class="card-header">History details</h6>
-    <div class="card-body">
-      <div class="History-Card" v-for="(list, index) in data" :key="list.id">
+    <div class="card-body" v-if="props.Histories">
+      <div
+        class="History-Card"
+        v-for="(list, index) in props.Histories"
+        :key="list.id"
+      >
         <div class="history-detailes" v-if="!NumberHistory[index]">
           <div class="content">
             <div class="row mr-2 p-0">
-              <div class="col-lg-3 image-history">
-                <img
-                  src="../../../assets/images/image1.png"
-                  class="imag-history"
-                /><span v-if="list.style == 'Accepted'" class="Accepted"
+              <div
+                class="col-lg-3 image-history"
+                v-for="img in list.image"
+                :key="img"
+              >
+                <img :src="img.original_url" class="imag-history" /><span
+                  v-if="list.status == 1"
+                  class="Accepted"
                   >Accepted</span
-                ><span v-if="list.style == 'Rejected'" class="Rejected"
-                  >Rejected</span
-                ><span v-if="list.style == 'Pending'" class="Pending"
-                  >Pending</span
-                >
+                ><span v-if="list.status == 2" class="Rejected">Rejected</span
+                ><span v-else class="Pending">Pending</span>
               </div>
               <div class="col-lg-9">
                 <h4>{{ list.title }}</h4>
-                <p class="my-1">{{ list.discription }}</p>
+                <p class="my-1">{{ list.description }}</p>
                 <span>{{ list.date }}</span>
               </div>
             </div>
@@ -118,6 +96,7 @@ onMounted(() => {
         </div>
       </div>
     </div>
+    <Loading v-else />
   </div>
 </template>
 <style scoped lang="scss">
@@ -132,7 +111,12 @@ onMounted(() => {
   .card-body {
     padding: 0px !important;
     .content {
+      width: 100%;
+      .row {
+        align-items: center;
+      }
       .imag-history {
+        height: 178px;
         width: 100%;
       }
     }

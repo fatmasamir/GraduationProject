@@ -22,11 +22,11 @@ onMounted(() => {
   padding-top: 100px;
   padding-bottom: 100px;
   background: transparent;
-  color: var(--orange-text-color);
+  color: black;
   span {
     width: 50px;
     height: 50px;
-    color: white;
+    color: black;
   }
 }
 </style>

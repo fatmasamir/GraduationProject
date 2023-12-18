@@ -24,15 +24,15 @@ const { meta } = useForm();
 // formLogin
 const { errors, handleSubmit, defineInputBinds } = useForm({
   validationSchema: Yup.object({
-    Password: Yup.string().min(6).required(),
+    password: Yup.string().min(6).required(),
     password_confirmation: Yup.string()
       .required(t("Rewrite new password"))
-      .oneOf([Yup.ref("Password")], "Passwords do not match"),
+      .oneOf([Yup.ref("password")], "Passwords do not match"),
   }),
 });
 
 //message ,Password
-const Password = defineInputBinds("Password");
+const password = defineInputBinds("password");
 const password_confirmation = defineInputBinds("password_confirmation");
 const error = ref(false);
 
@@ -87,7 +87,7 @@ onMounted(() => {
     data-aos-duration="900"
   >
     <div class="card-body">
-      <h6>Welcome back</h6>
+      <h6>Reset password</h6>
       <form @submit.prevent="onSubmit">
         <div class="row mt-4">
           <div class="col-md-12 passwordField">
@@ -97,9 +97,9 @@ onMounted(() => {
                 :type="passwordFieldType"
                 id="Password"
                 name="Password"
-                v-bind="Password"
+                v-bind="password"
                 placeholder="Password"
-                :class="{ 'is-invalid': errors.Password }"
+                :class="{ 'is-invalid': errors.password }"
               />
               <img
                 src="@/assets/images/eye-svgrepo.svg"
@@ -113,7 +113,7 @@ onMounted(() => {
                 v-else
               />
 
-              <div class="invalid-feedback">{{ errors.Password }}</div>
+              <div class="invalid-feedback">{{ errors.password }}</div>
             </SimpleInput>
           </div>
           <div class="col-md-12 passwordField">
@@ -146,12 +146,12 @@ onMounted(() => {
           </div>
           <div class="col-12 mt-3">
             <SimpleButton type="send" class="register_lab">
-              <button type="submit">
-                {{ t("Log in") }}
+              <button type="submit" v-if="!authStore.is_loading">
+                Confirm
               </button>
-              <!-- <button type="submit" disabled v-else>
+              <button type="submit" disabled v-else>
                 {{ t("wait") }}
-              </button> -->
+              </button>
             </SimpleButton>
           </div>
         </div>

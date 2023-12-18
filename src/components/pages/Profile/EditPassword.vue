@@ -6,6 +6,14 @@ import SimpleButton from "@/components/global/Buttons/simpleButton/SimpleButton.
 import { useForm } from "vee-validate";
 import * as Yup from "yup";
 import AOS from "aos";
+import { UseProfile } from "@/stores/Profile/index";
+import { useRouter } from "vue-router";
+
+//router
+let router = useRouter();
+
+// i18n
+const useProfile = UseProfile();
 
 // i18n
 const { t } = useI18n();
@@ -19,18 +27,18 @@ const { meta } = useForm();
 // formLogin
 const { errors, handleSubmit, defineInputBinds } = useForm({
   validationSchema: Yup.object({
-    Old_password: Yup.string().required("Password is required"),
-    password_confirmation: Yup.string()
+    old_password: Yup.string().required("Old Password is required"),
+    new_password: Yup.string().min(6).required("New Password is required"),
+    confirm_password: Yup.string()
       .required("Confirm password is required")
-      .oneOf([Yup.ref("Password")], "Passwords do not match"),
-    New_password: Yup.string().min(6).required("New Password is required"),
+      .oneOf([Yup.ref("new_password")], "Passwords do not match"),
   }),
 });
 
 //message ,name,phone
-const Old_password = defineInputBinds("Old_password");
-const password_confirmation = defineInputBinds("password_confirmation");
-const New_password = defineInputBinds("New_password");
+const old_password = defineInputBinds("old_password");
+const confirm_password = defineInputBinds("confirm_password");
+const new_password = defineInputBinds("new_password");
 const error = ref(false);
 
 // input password type
@@ -58,24 +66,20 @@ const switchVisibilityNew = () => {
 };
 // handel submit
 let onSubmit = handleSubmit((values: any) => {
-  error.value = false;
-  if (image.value) {
-    let formdata = new FormData();
-    let data = {
-      name: values.name,
-      phone: values.phone,
-      message: values.message,
-      image: image.value,
+  if (values) {
+    const data = {
+      old_password: values.old_password,
+      confirm_password: values.confirm_password,
+      new_password: values.new_password,
+      login: JSON.parse(localStorage.getItem("user")).email,
     };
-    for (let key in data) {
-      formdata.append(key, data[key]);
+    try {
+      useProfile.get_change_password(JSON.stringify(data));
+    } catch (err) {
+      console.log(err);
     }
-    console.log("formdata =", formdata);
-  } else {
-    error.value = true;
   }
 });
-
 onMounted(() => {
   AOS.init();
 });
@@ -96,11 +100,11 @@ onMounted(() => {
               <!-- <label>Email <span class="text-red">*</span> </label> -->
               <input
                 :type="passwordFieldType"
-                id="Old_password"
-                name="Old_password"
-                v-bind="Old_password"
-                placeholder="Old_password"
-                :class="{ 'is-invalid': errors.Old_password }"
+                id="old_password"
+                name="old_password"
+                v-bind="old_password"
+                placeholder="Old Password"
+                :class="{ 'is-invalid': errors.old_password }"
               />
               <img
                 src="@/assets/images/eye-svgrepo.svg"
@@ -114,35 +118,7 @@ onMounted(() => {
                 v-else
               />
 
-              <div class="invalid-feedback">{{ errors.Old_password }}</div>
-            </SimpleInput>
-          </div>
-          <div class="col-md-12 passwordField">
-            <SimpleInput>
-              <!-- <label>Email <span class="text-red">*</span> </label> -->
-              <input
-                :type="passwordFieldTypeComfirm"
-                id="password_confirmation"
-                name="password_confirmation"
-                v-bind="password_confirmation"
-                placeholder="Rewrite new password"
-                :class="{ 'is-invalid': errors.password_confirmation }"
-              />
-              <img
-                src="@/assets/images/eye-svgrepo.svg"
-                @click="switchVisibilityComfirm"
-                class="pass_icon"
-                v-if="passwordFieldTypeComfirm == 'password'"
-              /><img
-                src="@/assets/images/eye-slash.svg"
-                @click="switchVisibilityComfirm"
-                class="pass_icon"
-                v-else
-              />
-
-              <div class="invalid-feedback">
-                {{ errors.password_confirmation }}
-              </div>
+              <div class="invalid-feedback">{{ errors.old_password }}</div>
             </SimpleInput>
           </div>
           <div class="col-md-12 passwordField">
@@ -150,11 +126,11 @@ onMounted(() => {
               <!-- <label>Email <span class="text-red">*</span> </label> -->
               <input
                 :type="passwordFieldTypeNew"
-                id="New_password"
-                name="New_password"
-                v-bind="New_password"
+                id="new_password"
+                name="new_password"
+                v-bind="new_password"
                 placeholder="New Password"
-                :class="{ 'is-invalid': errors.New_password }"
+                :class="{ 'is-invalid': errors.new_password }"
               />
               <img
                 src="@/assets/images/eye-svgrepo.svg"
@@ -169,18 +145,49 @@ onMounted(() => {
               />
 
               <div class="invalid-feedback">
-                {{ errors.New_password }}
+                {{ errors.new_password }}
+              </div>
+            </SimpleInput>
+          </div>
+          <div class="col-md-12 passwordField">
+            <SimpleInput>
+              <!-- <label>Email <span class="text-red">*</span> </label> -->
+              <input
+                :type="passwordFieldTypeComfirm"
+                id="confirm_password"
+                name="confirm_password"
+                v-bind="confirm_password"
+                placeholder="Rewrite New Password"
+                :class="{ 'is-invalid': errors.confirm_password }"
+              />
+              <img
+                src="@/assets/images/eye-svgrepo.svg"
+                @click="switchVisibilityComfirm"
+                class="pass_icon"
+                v-if="passwordFieldTypeComfirm == 'password'"
+              /><img
+                src="@/assets/images/eye-slash.svg"
+                @click="switchVisibilityComfirm"
+                class="pass_icon"
+                v-else
+              />
+
+              <div class="invalid-feedback">
+                {{ errors.confirm_password }}
               </div>
             </SimpleInput>
           </div>
           <div class="col-12 mt-3">
             <SimpleButton type="send" class="register_lab">
-              <button type="submit">
+              <button
+                type="submit"
+                v-if="!useProfile.is_loading_change_password"
+              >
                 {{ t("Save") }}
               </button>
-              <!-- <button type="submit" disabled v-else>
+              <button type="submit" disabled v-else>
                 {{ t("wait") }}
-              </button> -->
+              </button>
             </SimpleButton>
           </div>
         </div>

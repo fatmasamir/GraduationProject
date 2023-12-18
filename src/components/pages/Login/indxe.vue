@@ -27,7 +27,7 @@ const { meta } = useForm();
 // formLogin
 const { errors, handleSubmit, defineInputBinds } = useForm({
   validationSchema: Yup.object({
-    login: Yup.string().required("required email"),
+    login: Yup.string().email().required("required email"),
     password: Yup.string().min(6).required(),
   }),
 });
@@ -47,17 +47,10 @@ const switchVisibility = () => {
 };
 
 // handel submit
-let onSubmit = handleSubmit((values: any) => {
+let onSubmit = handleSubmit(async (values: any) => {
   if (values) {
     try {
-      authStore.login(JSON.stringify(values)).then(() => {
-        if (authStore.is_auth) {
-          setTimeout(() => {
-            router.push("/");
-          }, 1000);
-          authStore.is_waiting = false;
-        }
-      });
+      await authStore.login(JSON.stringify(values));
     } catch (err) {
       console.log(err);
     }
