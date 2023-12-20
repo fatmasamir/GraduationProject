@@ -62,6 +62,13 @@
     }
   }
 }
+.NotFound {
+  margin: 50px auto;
+  color: #aaa;
+  font-size: 18px;
+  opacity: 0.6;
+  text-align: center;
+}
 @media screen and (max-width: 992px) {
   .card {
     width: 95%;

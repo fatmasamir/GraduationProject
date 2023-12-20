@@ -34,7 +34,7 @@ let onSubmit = handleSubmit((values: any) => {
   if (values) {
     console.log(values);
     try {
-      useProfile.get_new_username(JSON.stringify(values));
+      useProfile.set_new_username(JSON.stringify(values));
     } catch (err) {
       console.log(err);
     }

@@ -74,7 +74,7 @@ let onSubmit = handleSubmit((values: any) => {
       login: JSON.parse(localStorage.getItem("user")).email,
     };
     try {
-      useProfile.get_change_password(JSON.stringify(data));
+      useProfile.set_change_password(JSON.stringify(data));
     } catch (err) {
       console.log(err);
     }

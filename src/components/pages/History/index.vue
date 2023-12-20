@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import SimpleInput from "@/components/global/CusomInputs/SimpleInput/SimpleInput.vue";
 import SimpleButton from "@/components/global/Buttons/simpleButton/SimpleButton.vue";
@@ -7,7 +7,9 @@ import { useForm } from "vee-validate";
 import * as Yup from "yup";
 import { defineProps } from "vue";
 import AOS from "aos";
+import { UseHistory } from "@/stores/History/index";
 import Loading from "../../global/Loading/index.vue";
+let Histories = UseHistory();
 // i18n
 const props = defineProps(["Histories"]);
 // i18n
@@ -18,17 +20,26 @@ let onSubmit = () => {
   console.log("hello");
 };
 let NumberHistory = ref([]);
+let MessageFeedback = ref([]);
 let MakeFeedback = (index) => {
-  console.log("NumberHistory", NumberHistory.value);
   NumberHistory.value[index] = !NumberHistory.value[index];
-  console.log("NumberHistory", NumberHistory.value);
+};
+let sendFeedback = async (id, index) => {
+  const data = { feedback: MessageFeedback.value[index] };
+  await Histories.MakeFeedback(id, JSON.stringify(data)).then(() => {
+    setTimeout(() => {
+      MakeFeedback(index);
+    }, 1000);
+  });
 };
 onMounted(() => {
   AOS.init();
-  for (let key in props.Histories) {
+});
+watch(props, (newValue) => {
+  for (let key in newValue.Histories) {
     NumberHistory.value.push(false);
+    MessageFeedback.value.push("");
   }
-  console.log("NumberHistory", NumberHistory.value);
 });
 </script>
 <template>
@@ -41,6 +52,7 @@ onMounted(() => {
     <h6 class="card-header">History details</h6>
     <div class="card-body" v-if="props.Histories">
       <div
+        v-if="props.Histories.length > 0"
         class="History-Card"
         v-for="(list, index) in props.Histories"
         :key="list.id"
@@ -48,16 +60,15 @@ onMounted(() => {
         <div class="history-detailes" v-if="!NumberHistory[index]">
           <div class="content">
             <div class="row mr-2 p-0">
-              <div
-                class="col-lg-3 image-history"
-                v-for="img in list.image"
-                :key="img"
-              >
-                <img :src="img.original_url" class="imag-history" /><span
-                  v-if="list.status == 1"
-                  class="Accepted"
-                  >Accepted</span
-                ><span v-if="list.status == 2" class="Rejected">Rejected</span
+              <div class="col-lg-3 image-history">
+                <div class="imag-sec">
+                  <div v-for="img in list.image" :key="img" class="">
+                    <img :src="img.original_url" />
+                  </div>
+                </div>
+                <span v-if="list.status == 1" class="Accepted">Accepted</span
+                ><span v-else-if="list.status == 2" class="Rejected"
+                  >Rejected</span
                 ><span v-else class="Pending">Pending</span>
               </div>
               <div class="col-lg-9">
@@ -68,7 +79,7 @@ onMounted(() => {
             </div>
           </div>
           <SimpleButton type="send">
-            <button @click="MakeFeedback(index)">
+            <button @click="MakeFeedback(index)" v-if="list.status">
               Send feedback
             </button></SimpleButton
           >
@@ -79,8 +90,21 @@ onMounted(() => {
               <div class="row m-0 p-0">
                 <div class="col-md-10 m-0 p-0">
                   <SimpleInput>
-                    <textarea placeholder="Feedback" :rows="4"></textarea>
-                    <span class="send-feedback"> Send feedback </span>
+                    <textarea
+                      placeholder="Feedback"
+                      v-model="MessageFeedback[index]"
+                      :rows="4"
+                    ></textarea>
+                    <span
+                      v-if="!Histories.is_loadingMakeFeedback"
+                      class="send-feedback"
+                      @click="sendFeedback(list.id, index)"
+                    >
+                      Send feedback
+                    </span>
+                    <span class="send-feedback disabled" v-else>
+                      {{ t("wait") }} ...
+                    </span>
                   </SimpleInput>
                 </div>
                 <div class="col-md-2 m-0 p-0">
@@ -95,6 +119,7 @@ onMounted(() => {
           </div>
         </div>
       </div>
+      <div v-else class="NotFound">not found</div>
     </div>
     <Loading v-else />
   </div>
@@ -115,9 +140,14 @@ onMounted(() => {
       .row {
         align-items: center;
       }
-      .imag-history {
+      .imag-sec {
         height: 178px;
+        display: block;
         width: 100%;
+        img {
+          width: 100%;
+          height: 178px;
+        }
       }
     }
   }
@@ -184,6 +214,9 @@ onMounted(() => {
           color: rgba(0, 16, 99, 1);
           font-weight: 600;
           cursor: pointer !important;
+        }
+        .disabled {
+          color: #aaa;
         }
       }
     }

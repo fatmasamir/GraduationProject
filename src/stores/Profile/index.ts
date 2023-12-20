@@ -11,8 +11,8 @@ export const UseProfile = defineStore("Profile", () => {
   const is_loading = ref<Boolean>(false);
   const is_loading_change_password = ref<Boolean>(false);
 
-  //Get new_username
-  async function get_new_username(data) {
+  //set new_username
+  async function set_new_username(data) {
     is_loading.value = true;
     const response = await callServer({
       url: "api/profile/change-username",
@@ -35,8 +35,8 @@ export const UseProfile = defineStore("Profile", () => {
       is_loading.value = false;
     }
   }
-  //Get change_password
-  async function get_change_password(data) {
+  //set change_password
+  async function set_change_password(data) {
     is_loading_change_password.value = true;
     const response = await callServer({
       url: "api/profile/change-password",
@@ -58,8 +58,8 @@ export const UseProfile = defineStore("Profile", () => {
     }
   }
   return {
-    get_new_username,
-    get_change_password,
+    set_new_username,
+    set_change_password,
     is_loading,
     is_loading_change_password,
   };

@@ -8,6 +8,7 @@ export const UseHistory = defineStore("History", () => {
   // is_waiting
   const is_waiting = ref<Boolean>(false);
   const is_loading = ref<Boolean>(false);
+  const is_loadingMakeFeedback = ref<Boolean>(false);
 
   //Get new_username
   async function get_history() {
@@ -25,16 +26,36 @@ export const UseHistory = defineStore("History", () => {
       });
     } else {
       await response.json().then((data) => {
-        toast.error(data.message);
+        toast.error(data.errors);
       });
       is_loading.value = false;
       is_waiting.value = false;
     }
   }
+  //set MakeFeedback
+  async function MakeFeedback(id, data) {
+    is_loadingMakeFeedback.value = true;
+    const response = await callServer({
+      url: "api/issue/" + id + "/feedback",
+      method: "POST",
+      auth: true,
+      data,
+    });
+    if (response.ok) {
+      await toast.success("Successfully Change Password... ");
+      is_loadingMakeFeedback.value = false;
+      // this.router.push("/login");
+    } else {
+      toast.error("Error");
+      is_loadingMakeFeedback.value = false;
+    }
+  }
   return {
     get_history,
+    MakeFeedback,
     Histories,
     is_loading,
     is_waiting,
+    is_loadingMakeFeedback,
   };
 });
