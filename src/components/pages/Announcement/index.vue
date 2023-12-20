@@ -40,7 +40,7 @@ onMounted(() => {
     <h6 class="card-header">Announcement</h6>
     <div class="card-body" v-if="props.announcements">
       <div
-        v-if="props.announcements && props.announcements.length > 0"
+        v-if="props.announcements.length > 0"
         class="Announcement-Card"
         v-for="(list, index) in props.announcements"
         :key="list.id"
