@@ -1,10 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-import SimpleInput from "@/components/global/CusomInputs/SimpleInput/SimpleInput.vue";
-import SimpleButton from "@/components/global/Buttons/simpleButton/SimpleButton.vue";
-import { useForm } from "vee-validate";
-import * as Yup from "yup";
 import AOS from "aos";
 import Loading from "../../global/Loading/index.vue";
 import { defineProps } from "vue";
@@ -14,17 +10,6 @@ const props = defineProps(["announcements"]);
 
 // i18n
 const { t } = useI18n();
-
-// handel submit
-// let onSubmit = () => {
-//   console.log("hello");
-// };
-// let NumberHistory = ref([]);
-// let MakeFeedback = (index) => {
-//   console.log("NumberHistory", NumberHistory.value);
-//   NumberHistory.value[index] = !NumberHistory.value[index];
-//   console.log("NumberHistory", NumberHistory.value);
-// };
 
 onMounted(() => {
   AOS.init();
@@ -42,7 +27,7 @@ onMounted(() => {
       <div
         v-if="props.announcements.length > 0"
         class="Announcement-Card"
-        v-for="(list, index) in props.announcements"
+        v-for="list in props.announcements"
         :key="list.id"
       >
         <div class="announcement-detailes">
