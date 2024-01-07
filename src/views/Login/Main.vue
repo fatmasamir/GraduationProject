@@ -8,9 +8,9 @@ let router = useRouter();
 
 //onMounted
 onMounted(() => {
-  if (localStorage.getItem("access_token")) {
-    router.push("/");
-  }
+  // if (localStorage.getItem("access_token")) {
+  //   router.push("/");
+  // }
 });
 </script>
 <template>

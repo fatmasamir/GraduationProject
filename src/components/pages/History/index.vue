@@ -32,6 +32,13 @@ let sendFeedback = async (id, index) => {
     }, 1000);
   });
 };
+let DeleteHistoryfun = async (id, index) => {
+  await Histories.DeleteHistory(id, index).then(() => {
+    setTimeout(() => {
+      console.log("oky");
+    }, 1000);
+  });
+};
 onMounted(() => {
   AOS.init();
 });
@@ -83,6 +90,15 @@ watch(props, (newValue) => {
               Send feedback
             </button></SimpleButton
           >
+          <SimpleButton type="send">
+            <button
+              class="btn-danger"
+              @click="DeleteHistoryfun(list.id, index)"
+              :disabled="Histories.DeleteHistoryLoading"
+            >
+              Delete
+            </button></SimpleButton
+          >
         </div>
         <div class="history-detailes-form" v-else>
           <div class="content">
@@ -119,7 +135,7 @@ watch(props, (newValue) => {
           </div>
         </div>
       </div>
-      <div v-else class="NotFound">not found</div>
+      <div v-else class="NotFound">History is empty</div>
     </div>
     <Loading v-else />
   </div>
@@ -224,6 +240,10 @@ watch(props, (newValue) => {
 }
 .simple-button.send button {
   width: max-content;
+}
+.simple-button.send button.btn-danger {
+  background: #dc3545 !important;
+  padding: 10px !important;
 }
 @media screen and (max-width: 993px) {
   .card {

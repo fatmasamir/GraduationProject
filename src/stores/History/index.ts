@@ -9,6 +9,7 @@ export const UseHistory = defineStore("History", () => {
   const is_waiting = ref<Boolean>(false);
   const is_loading = ref<Boolean>(false);
   const is_loadingMakeFeedback = ref<Boolean>(false);
+  const DeleteHistoryLoading = ref<Boolean>(false);
 
   //Get new_username
   async function get_history() {
@@ -21,13 +22,13 @@ export const UseHistory = defineStore("History", () => {
     console.log(response);
     if (response.ok) {
       await response.json().then(async (data: { token: string }) => {
-        Histories.value = data.data;
+        Histories.value = data.data.history;
         console.log("Useissues=", Histories.value);
       });
     } else {
-      await response.json().then((data) => {
-        toast.error(data.errors);
-      });
+      // await response.json().then((data) => {
+      //   toast.error(data.errors);
+      // });
       is_loading.value = false;
       is_waiting.value = false;
     }
@@ -50,12 +51,31 @@ export const UseHistory = defineStore("History", () => {
       is_loadingMakeFeedback.value = false;
     }
   }
+  //set MakeFeedback
+  async function DeleteHistory(id, index) {
+    is_loadingMakeFeedback.value = true;
+    const response = await callServer({
+      url: "api/history/" + id,
+      method: "DELETE",
+      auth: true,
+    });
+    if (response.ok) {
+      await toast.success("Successfully Delete... ");
+      Histories.value.splice(0, 1);
+      DeleteHistoryLoading.value = false;
+    } else {
+      toast.error("Error");
+      DeleteHistoryLoading.value = false;
+    }
+  }
   return {
     get_history,
     MakeFeedback,
+    DeleteHistory,
     Histories,
     is_loading,
     is_waiting,
     is_loadingMakeFeedback,
+    DeleteHistoryLoading,
   };
 });

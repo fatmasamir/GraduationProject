@@ -80,7 +80,7 @@ onMounted(() => {
     data-aos-duration="900"
   >
     <div class="card-body">
-      <h6>Fill in your data so we can help you</h6>
+      <h6>Fill in your complain so we can help you</h6>
       <form @submit.prevent="onSubmit">
         <div class="row mt-4">
           <div class="col-md-12">
@@ -122,7 +122,8 @@ onMounted(() => {
                 id="message"
                 name="message"
                 v-bind="description"
-                placeholder="message"
+                placeholder="Description 
+“Please Mention Your Location”"
                 :class="{ 'is-invalid': errors.description }"
               ></textarea>
 
