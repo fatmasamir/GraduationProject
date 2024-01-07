@@ -6,6 +6,7 @@ import SimpleButton from "@/components/global/Buttons/simpleButton/SimpleButton.
 import { useForm } from "vee-validate";
 import * as Yup from "yup";
 import { defineProps } from "vue";
+import Swal from "sweetalert2";
 import AOS from "aos";
 import { UseHistory } from "@/stores/History/index";
 import Loading from "../../global/Loading/index.vue";
@@ -33,10 +34,25 @@ let sendFeedback = async (id, index) => {
   });
 };
 let DeleteHistoryfun = async (id, index) => {
-  await Histories.DeleteHistory(id, index).then(() => {
-    setTimeout(() => {
-      console.log("oky");
-    }, 1000);
+  Swal.fire({
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#dc3545",
+    cancelButtonColor: "#aaa",
+    title: "Are you want to delete this History",
+    confirmButtonText: "Delete",
+    cancelButtonText: "Cancel",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      Histories.DeleteHistory(id, index).then(() => {
+        setTimeout(() => {
+          Swal.fire({
+            title: "Deleted!",
+            icon: "success",
+          });
+        }, 1000);
+      });
+    }
   });
 };
 onMounted(() => {
@@ -94,6 +110,7 @@ watch(props, (newValue) => {
             <button
               class="btn-danger"
               @click="DeleteHistoryfun(list.id, index)"
+              :class="Histories.DeleteHistoryLoading ? 'disabled' : ''"
               :disabled="Histories.DeleteHistoryLoading"
             >
               Delete
@@ -238,12 +255,17 @@ watch(props, (newValue) => {
     }
   }
 }
+
 .simple-button.send button {
   width: max-content;
 }
 .simple-button.send button.btn-danger {
   background: #dc3545 !important;
   padding: 10px !important;
+}
+.simple-button.send button.btn-danger.disabled {
+  background: #eee !important;
+  color: #aaa !important;
 }
 @media screen and (max-width: 993px) {
   .card {

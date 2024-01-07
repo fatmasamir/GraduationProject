@@ -39,7 +39,8 @@ import "vue-toastification/dist/index.css";
 import BootstrapVue3 from "bootstrap-vue-3";
 import "aos/dist/aos.css";
 const app = createApp(App);
-
+import VueSweetalert2 from "vue-sweetalert2";
+import "sweetalert2/dist/sweetalert2.min.css";
 //pinia
 const pinia = createPinia();
 pinia.use(({ store }) => {
@@ -51,6 +52,7 @@ createApp(App)
   .use(pinia)
   .use(i18n)
   .use(BootstrapVue3)
+  .use(VueSweetalert2)
   .use(Toast, {
     // Setting the global default position
     position: POSITION.TOP_LEFT,

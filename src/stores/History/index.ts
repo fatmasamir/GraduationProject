@@ -61,7 +61,7 @@ export const UseHistory = defineStore("History", () => {
     });
     if (response.ok) {
       await toast.success("Successfully Delete... ");
-      Histories.value.splice(0, 1);
+      Histories.value.splice(index, 1);
       DeleteHistoryLoading.value = false;
     } else {
       toast.error("Error");
