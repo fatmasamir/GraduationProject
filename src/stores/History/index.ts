@@ -45,6 +45,7 @@ export const UseHistory = defineStore("History", () => {
     if (response.ok) {
       await toast.success("Successfully Change Password... ");
       is_loadingMakeFeedback.value = false;
+      get_history();
       // this.router.push("/login");
     } else {
       toast.error("Error");

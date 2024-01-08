@@ -100,10 +100,23 @@ watch(props, (newValue) => {
                 <span>{{ list.date }}</span>
               </div>
             </div>
+            <div
+              class="row mt-2 feedback-sec"
+              v-if="list.feedback && list.feedback.length > 0"
+            >
+              <div class="col-lg-12">
+                <h6>The feedback :-</h6>
+                <ul>
+                  <li v-for="feed in list.feedback" :key="feed.id">
+                    <p>- {{ feed.feedback }}</p>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
           <SimpleButton type="send">
             <button @click="MakeFeedback(index)" v-if="list.status">
-              Send feedback
+              feedback
             </button></SimpleButton
           >
           <SimpleButton type="send">
@@ -215,6 +228,15 @@ watch(props, (newValue) => {
         background: rgba(191, 172, 2, 1);
       }
     }
+    .feedback-sec {
+      ul {
+        padding: 5px 15px;
+        p {
+          font-size: 14px;
+          margin-bottom: 5px;
+        }
+      }
+    }
     h4 {
       margin: 5px 0px;
     }
@@ -258,6 +280,9 @@ watch(props, (newValue) => {
 
 .simple-button.send button {
   width: max-content;
+  padding: 5px 10px;
+  margin: 3px;
+  height: 48px;
 }
 .simple-button.send button.btn-danger {
   background: #dc3545 !important;
