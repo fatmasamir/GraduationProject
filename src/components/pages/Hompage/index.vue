@@ -42,9 +42,7 @@ onMounted(() => {
       <div
         class="edit absolute top-0 left-0 w-full h-full z-40"
         @click="GetInformationProduct(prod.id)"
-      >
-        <!-- <span><img src="@/assets/images/eye-svgrepo-com.svg" /></span> -->
-      </div>
+      ></div>
     </div>
 
     <poupdetailes
