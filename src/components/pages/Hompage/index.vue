@@ -1,162 +1,158 @@
-<script setup lang="ts">
-import { onMounted, ref } from "vue";
-import { useI18n } from "vue-i18n";
-import SimpleInput from "@/components/global/CusomInputs/SimpleInput/SimpleInput.vue";
-import SimpleButton from "@/components/global/Buttons/simpleButton/SimpleButton.vue";
-import { useForm } from "vee-validate";
-import * as Yup from "yup";
-import AOS from "aos";
-import { Useissues } from "@/stores/issues/index";
-
-// i18n
-const { t } = useI18n();
-
-// i18n
-const useissues = Useissues();
-
-// formRef
-const formRef = ref(null);
-
-// meta
-const { meta } = useForm();
-
-// formLogin
-const { errors, handleSubmit, defineInputBinds } = useForm({
-  validationSchema: Yup.object({
-    title: Yup.string().required("Name is reqired"),
-    description: Yup.string().min(6).required("Message is Required"),
-  }),
-});
-
-//message ,name,phone
-const title = defineInputBinds("title");
-const description = defineInputBinds("description");
-const image = ref();
-const imageUrl = ref();
-const imageName = ref();
-const error = ref(false);
-
-// fileSelected
-let fileSelected = (event) => {
-  const file = event.target.files.item(0);
-  image.value = file;
-  const reader = new FileReader();
-  error.value = false;
-  reader.addEventListener("load", imageLoaded);
-  reader.readAsDataURL(file);
+<script setup>
+import { defineProps, onMounted, ref } from "vue";
+import poupdetailes from "./poupdetailes.vue";
+import { UseProducts } from "@/stores/products/index";
+import { useRoute } from "vue-router";
+const Products = UseProducts();
+const route = useRoute();
+const poupdetailesShow = ref(false);
+const props = defineProps(["Products"]);
+const firstImageLoad = ref(true);
+const GetInformationProduct = async (id) => {
+  await Products.getProductInfo(id);
+  poupdetailesShow.value = true;
 };
-let imageLoaded = (event) => {
-  imageUrl.value = event.target.result;
-  imageName.value = image.value.name;
+const loadImage = () => {
+  firstImageLoad.value = false;
 };
-// handel submit
-let onSubmit = handleSubmit(async (values: any) => {
-  error.value = false;
-  if (image.value) {
-    let formdata = new FormData();
-    let data = {
-      title: values.title,
-      description: values.description,
-    };
-    for (let key in data) {
-      formdata.append(key, data[key]);
-    }
-    formdata.append("media[0]", image.value);
-    await useissues.make_issues(formdata);
-  } else {
-    error.value = true;
-  }
-});
-
 onMounted(() => {
-  AOS.init();
+  firstImageLoad.value = true;
 });
 </script>
 <template>
-  <div
-    class="card"
-    data-aos="fade-in"
-    data-aos-easing="linear"
-    data-aos-duration="900"
-  >
-    <div class="card-body">
-      <h6>Fill in your complain so we can help you</h6>
-      <form @submit.prevent="onSubmit">
-        <div class="row mt-4">
-          <div class="col-md-12">
-            <SimpleInput>
-              <!-- <label>Email <span class="text-red">*</span> </label> -->
-              <input
-                type="text"
-                id="title"
-                name="title"
-                v-bind="title"
-                placeholder="title"
-                :class="{ 'is-invalid': errors.title }"
-              />
-
-              <div class="invalid-feedback">{{ errors.title }}</div>
-            </SimpleInput>
-          </div>
-          <div class="col-10 upload_content">
-            <p v-if="imageName">{{ imageName }}</p>
-            <p v-else>Upload your problem images</p>
-            <div class="invalid-feedback" v-if="error">
-              Upload your problem images is a required field
-            </div>
-          </div>
-          <div class="col-2 upload_icon">
-            <img src="@/assets/images/export.svg" />
-            <input
-              type="file"
-              accept="image/*"
-              @change="fileSelected"
-              class="imgfileType"
-            />
-          </div>
-          <div class="col-md-12 mt-3">
-            <SimpleInput>
-              <!-- <label>Email <span class="text-red">*</span> </label> -->
-              <textarea
-                type="message"
-                id="message"
-                name="message"
-                v-bind="description"
-                placeholder="Description 
-“Please Mention Your Location”"
-                :class="{ 'is-invalid': errors.description }"
-              ></textarea>
-
-              <div class="invalid-feedback">{{ errors.description }}</div>
-            </SimpleInput>
-          </div>
-          <div class="col-12 mt-3">
-            <SimpleButton type="send" class="register_lab">
-              <button type="submit" v-if="!useissues.is_loading">
-                {{ t("Send") }}
-              </button>
-              <button type="submit" disabled v-else>
-                {{ t("wait") }}
-              </button>
-            </SimpleButton>
-          </div>
-        </div>
-      </form>
+  <!-- <pre>{{ props.Products }}</pre> -->
+  <div class="grid-container w-full">
+    <div
+      :class="'product' + i"
+      v-for="(prod, i) in props.Products"
+      :key="prod"
+      class="product relative"
+    >
+      <img
+        :src="prod.firstThumbImage"
+        v-if="firstImageLoad"
+        class="w-full h-full object-cover"
+      />
+      <img
+        class="w-full h-full object-cover"
+        :src="prod.firstImage"
+        :class="firstImageLoad ? 'hidden' : ''"
+        @load="loadImage"
+      />
+      <div
+        class="edit absolute top-0 left-0 w-full h-full z-40"
+        @click="GetInformationProduct(prod.id)"
+      >
+        <!-- <span><img src="@/assets/images/eye-svgrepo-com.svg" /></span> -->
+      </div>
     </div>
+
+    <poupdetailes
+      v-if="poupdetailesShow && !Products.Product_notfound"
+      @closepop="poupdetailesShow = false"
+    />
   </div>
 </template>
 <style scoped lang="scss">
-@import "./FormStyling.scss";
-.card {
-  width: 70%;
-  margin-top: 5%;
-}
-.simple-button.send button {
-  width: max-content;
-}
-@media screen and (max-width: 993px) {
-  .card {
-    width: 100%;
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows:
+    150px 150px 150px 100px
+    150px 150px 150px 100px
+    150px 150px 150px 100px
+    150px 150px 150px 100px
+    150px 150px 150px 100px
+    150px 150px 150px 100px
+    150px 150px 150px 100px
+    150px 150px 150px 100px
+    150px 150px 150px 100px
+    150px 150px 150px 100px
+    150px 150px 150px 100px
+    150px;
+  row-gap: 5px;
+  column-gap: 5px;
+  .product {
+    // position: relative;
+    img {
+      // width: 100%;
+      // height: 100%;
+      // object-fit: cover;
+    }
+    .edit {
+      // display: none;
+      // align-items: top;
+      // justify-content: start;
+      // z-index: 999;
+    }
+    &:hover {
+      // box-shadow: 0px 0px 10px black;
+      cursor: pointer;
+      .edit {
+        display: flex;
+      }
+    }
   }
+  @media (max-width: 768px) {
+    grid-template-rows:
+      100px 150px 150px 50px
+      100px 150px 150px 50px
+      100px 150px 150px 50px
+      100px 150px 150px 50px
+      100px 150px 150px 50px
+      100px 150px 150px 50px
+      100px 150px 150px 50px
+      100px 150px 150px 50px
+      100px 150px 150px 50px
+      100px 150px 150px 50px
+      100px 150px 150px 50px;
+  }
+}
+.product5 {
+  grid-row: 2 / span 2;
+  grid-column: 2 / span 2;
+}
+.product12 {
+  grid-row: 6 / span 2;
+  grid-column: 1 / span 2;
+}
+.product23 {
+  grid-row: 10 / span 2;
+  grid-column: 2 / span 2;
+}
+.product30 {
+  grid-row: 14 / span 2;
+  grid-column: 1 / span 2;
+}
+.product41 {
+  grid-row: 18 / span 2;
+  grid-column: 2 / span 2;
+}
+.product48 {
+  grid-row: 22 / span 2;
+  grid-column: 1 / span 2;
+}
+.product59 {
+  grid-row: 27 / span 2;
+  grid-column: 2 / span 2;
+}
+.product69 {
+  grid-row: 30 / span 2;
+  grid-column: 1 / span 2;
+}
+.product77 {
+  grid-row: 34 / span 2;
+  grid-column: 2 / span 2;
+}
+.product84 {
+  grid-row: 38 / span 2;
+  grid-column: 1 / span 2;
+}
+.product95 {
+  grid-row: 42 / span 2;
+  grid-column: 2 / span 2;
+}
+.hidden {
+  opacity: 0;
 }
 </style>

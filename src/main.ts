@@ -12,10 +12,10 @@ import App from "./App.vue";
 
 // bootstrap
 import "@popperjs/core";
-import "bootstrap/dist/js/bootstrap.bundle";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle";
-import "bootstrap";
+// import "bootstrap/dist/js/bootstrap.bundle";
+// import "bootstrap/dist/css/bootstrap.min.css";
+// import "bootstrap/dist/js/bootstrap.bundle";
+// import "bootstrap";
 
 // vue inline svg
 import InlineSvg from "vue-inline-svg";
@@ -36,11 +36,13 @@ import Toast, { POSITION } from "vue-toastification";
 import "vue-toastification/dist/index.css";
 
 // Bootstrap Vue
-import BootstrapVue3 from "bootstrap-vue-3";
+// import BootstrapVue3 from "bootstrap-vue-3";
 import "aos/dist/aos.css";
 const app = createApp(App);
 import VueSweetalert2 from "vue-sweetalert2";
 import "sweetalert2/dist/sweetalert2.min.css";
+import "./input.css";
+// import "bootstrap-vue-3/dist/bootstrap-vue-3.css";
 //pinia
 const pinia = createPinia();
 pinia.use(({ store }) => {
@@ -51,7 +53,6 @@ createApp(App)
   .use(router)
   .use(pinia)
   .use(i18n)
-  .use(BootstrapVue3)
   .use(VueSweetalert2)
   .use(Toast, {
     // Setting the global default position

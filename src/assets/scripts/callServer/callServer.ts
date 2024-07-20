@@ -21,7 +21,7 @@ let callServer: CallFunction = async (options) => {
   };
 
   // base url
-  const base_url: string = `http://api.rris-ahmed.website`;
+  const base_url: string = `https://test.api.bakeet.shop/api/v1_93`;
 
   const end_point: string = `${base_url}/${options.url}`;
   // header
